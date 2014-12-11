@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Mobile Security</string>
+    <string name="title_section1">Backup</string>
+    <string name="title_section2">Restore</string>
+    <string name="title_section3">Network Status</string>
+    <string name="title_section4">Log Operation</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
+    <string name="other_settings">Other Settings</string>
+    <string name="auto_backup">Auto Backup</string>
+    <string name="auto_backup_interval">Auto Backup Time Interval</string>
+    <string name="clear_history">Clear History</string>
+    <string-array name="auto_backup_time">
+        <item>1 minute</item>
+    	<item>1 hour</item>
+    	<item>12 hours</item>
+    	<item>24 hours</item>
+	</string-array>
+
+	<string-array name="auto_backup_time_values">
+    	<item>1</item>
+    	<item>60</item>
+    	<item>720</item>
+    	<item>1440</item>
+	</string-array>
+	<string name="auto_backup_time_default">60</string>
+	<string name="backup_wifi">Backup over wifi Only</string>
+	<string name="backup_contacts">Backup Contacts</string>
+	<string name="backup_calls">Backup Call History</string>
+	<string name="backup_photos">Backup Photos</string>
+	<string name="backup_all">Backup All</string>
+	<string name="restore_contacts">Restore Contacts</string>
+	<string name="restore_calls">Restore Call History</string>
+	<string name="restore_photos">Restore Photos</string>
+	<string name="restore_all">Restore All</string>
+</resources>
