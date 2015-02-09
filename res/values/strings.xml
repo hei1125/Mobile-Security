@@ -4,7 +4,7 @@
     <string name="app_name">Mobile Security</string>
     <string name="title_section1">Backup</string>
     <string name="title_section2">Restore</string>
-    <string name="title_section3">Network Status</string>
+    <string name="title_section3">Location Tracking</string>
     <string name="title_section4">Log Operation</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -36,4 +36,5 @@
 	<string name="restore_calls">Restore Call History</string>
 	<string name="restore_photos">Restore Photos</string>
 	<string name="restore_all">Restore All</string>
+	<string name="report_location">Report Location</string>
 </resources>

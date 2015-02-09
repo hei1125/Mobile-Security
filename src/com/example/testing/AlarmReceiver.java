@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
@@ -15,20 +17,23 @@ import android.widget.Toast;
 public class AlarmReceiver extends BroadcastReceiver
 {
 	public MyDBHelper dbHelper; 
-    private SQLiteDatabase db; 
     private SharedPreferences prefs;
+    
     @Override
     public void onReceive(Context context, Intent intent)
     {
     	dbHelper = new MyDBHelper(context); 
     	PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YOUR TAG");
+        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TAG");
         wl.acquire();
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean isAutoBackup = prefs.getBoolean("auto_backup", false);
+        boolean backupOverWifi = prefs.getBoolean("backup_wifi", false);
         if (isAutoBackup) {
-        	autobackup(context);
-        }
+        	if (backupOverWifi == false || backupOverWifi == usingWifi(context)){
+        		autobackup(context);
+        	}
+        } 
         //Release the lock
         wl.release();
     }
@@ -48,6 +53,20 @@ public class AlarmReceiver extends BroadcastReceiver
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(sender);
+    }
+    
+    public boolean usingWifi(Context context){
+    	// Initialize Network Info
+    	ConnectivityManager cm =
+    	    	        (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    	NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+    	if (activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting()){
+    		if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI){
+				return true;
+			}
+    	}
+    	return false;
     }
     
     public boolean autobackup(Context context){

@@ -1,6 +1,9 @@
 package com.example.testing;
 
-import java.text.DateFormat;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,14 +15,17 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,6 +54,10 @@ public class MainActivity extends Activity
     public MyDBHelper dbHelper; 
     private SQLiteDatabase db; 	
 	private AlarmReceiver alarm;
+	Cursor cursor;
+    ArrayList<String> vCard;
+    String vfile;
+    GPSTracker gps;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,14 +181,66 @@ public class MainActivity extends Activity
     }
 
     /**
-     * Backup Methods
-     */
+     * Backup Contacts
+     */   
+    private void getVcardString() throws IOException {
+        // TODO Auto-generated method stub
+        vCard = new ArrayList<String>(); 
+        vfile = "Contacts" + "_" + System.currentTimeMillis() + ".vcf";
+        cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        if(cursor != null && cursor.getCount() > 0)
+        {
+            int i;
+            String storage_path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
+            FileOutputStream mFileOutputStream = new FileOutputStream(storage_path, false);
+            cursor.moveToFirst();
+            for(i = 0;i<cursor.getCount();i++)
+            {
+                get(cursor);
+                Log.d("TAG", "Contact "+(i+1)+"VcF String is"+ vCard.get(i));
+                cursor.moveToNext();
+                mFileOutputStream.write(vCard.get(i).toString().getBytes());
+            }
+            mFileOutputStream.close();
+            cursor.close();
+        }
+        else
+        {
+            Log.d("TAG", "No Contacts in Your Phone");
+        }
+    }
+    
+    private void get(Cursor cursor2) {
+        String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+        Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
+        AssetFileDescriptor fd;
+        try {
+            fd = this.getContentResolver().openAssetFileDescriptor(uri, "r");
+
+            FileInputStream fis = fd.createInputStream();
+            byte[] buf = new byte[(int) fd.getDeclaredLength()];
+            fis.read(buf);
+            String vcardstring= new String(buf);
+            vCard.add(vcardstring);
+        } catch (Exception e1) 
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
+    
     public boolean backupContact(){
+    	try {
+			getVcardString();
+			Toast.makeText(this, "Backup Contacts is successful", Toast.LENGTH_SHORT).show();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	ContentValues values = new ContentValues(); 
         values.put("Operation", "Backup Contact");  
         values.put("Time", System.currentTimeMillis());    
         dbHelper.getWritableDatabase().insert("LogOperation", null, values);
-        Toast.makeText(this, "Backup Contacts", Toast.LENGTH_SHORT).show();
     	return true;
     }
     
@@ -188,7 +250,6 @@ public class MainActivity extends Activity
         values.put("Time", System.currentTimeMillis());  
         dbHelper.getWritableDatabase().insert("LogOperation", null, values);
 		Toast.makeText(this, "Backup Photos", Toast.LENGTH_SHORT).show();
-
     	return true;
     }
     
@@ -350,40 +411,36 @@ public class MainActivity extends Activity
         }
     }
     /**
-     * Management fragment
+     * Location fragment
      */
     public class NetworkFragment extends Fragment {
 		public NetworkFragment() {
         }
 		
-		// Initialize Network Info
-		ConnectivityManager cm =
-    	        (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-		
-		// Check Network Connection 
-		public void checkConnection(View view){
+		public void checkLocation(View view){
         	TextView textView3 = (TextView)view.findViewById(R.id.textView3);
-        	TextView textView5 = (TextView)view.findViewById(R.id.textView5);
-        	if (activeNetwork != null &&
-        	                      activeNetwork.isConnectedOrConnecting()){
-        		textView3.setText("Network is available");
-        		if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI){
-    				textView5.setText("Using Wi-fi");
-    			} else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE){
-            		textView5.setText("Using Data Network");
-            	}
-        	} else {
-        		textView3.setText("Network is unavailable");
-        		textView5.setText("No network connection");
-        	}
+        	gps = new GPSTracker(MainActivity.this);
+
+            // Check if GPS enabled
+            if(gps.canGetLocation()) {
+
+                double latitude = gps.getLatitude();
+                double longitude = gps.getLongitude();
+                // \n is for new line
+                textView3.setText("Your Location is - \nLat: " + latitude + "\nLong: " + longitude);
+            } else {
+                // Can't get location.
+                // GPS or network is not enabled.
+                // Ask user to enable GPS/network in settings.
+                gps.showSettingsAlert();
+            }
 		}
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
         	View rootView = inflater.inflate(R.layout.fragment_3, container, false);
-        	checkConnection(rootView);
+        	checkLocation(rootView);
             return rootView;
         }
       	

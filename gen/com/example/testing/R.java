@@ -42,6 +42,7 @@ public final class R {
         public static final int backup_calls=0x7f09000b;
         public static final int backup_contacts=0x7f09000d;
         public static final int backup_photos=0x7f09000c;
+        public static final int button1=0x7f090009;
         public static final int container=0x7f090001;
         public static final int drawer_layout=0x7f090000;
         public static final int list=0x7f090010;
@@ -55,7 +56,6 @@ public final class R {
         public static final int textView1=0x7f09000f;
         public static final int textView2=0x7f090007;
         public static final int textView3=0x7f090008;
-        public static final int textView5=0x7f090009;
         public static final int time=0x7f090012;
     }
     public static final class layout {
@@ -87,6 +87,7 @@ public final class R {
         public static final int navigation_drawer_close=0x7f050006;
         public static final int navigation_drawer_open=0x7f050005;
         public static final int other_settings=0x7f050008;
+        public static final int report_location=0x7f050016;
         public static final int restore_all=0x7f050015;
         public static final int restore_calls=0x7f050013;
         public static final int restore_contacts=0x7f050012;
